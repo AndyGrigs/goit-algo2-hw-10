@@ -7,51 +7,60 @@ class Teacher:
         self.email = email
         self.can_teach_subjects = can_teach_subjects
         self.assigned_subjects = set()
- 
+
 
 def create_schedule(subjects, teachers):
-   uncovered_subjects = subjects.copy()  # Копія предметів, які ще не покриті
-   selected_teachers = [] # Список обраних викладачів
-
-   # Поки є непокриті предмети
-   while uncovered_subjects:
-       best_teacher = None
-       max_covered = 0
-
-       # Шукаємо викладача, який покриває найбільше непокритих предметів
-       for teacher in teachers:
-           # Скільки непокритих предметів може викладати цей викладач
-           covered = len(teacher.can_teach_subjects & uncovered_subjects)
-           # Якщо цей викладач покриває більше предметів
-           if covered > max_covered:
-               best_teacher = teacher
-               max_covered = covered
-       
-
-
-
-
-   
-
-
+    uncovered_subjects = subjects.copy()  # Копія предметів, які ще не покриті
+    selected_teachers = []  # Список обраних викладачів
     
+    while uncovered_subjects:  # Поки є непокриті предмети
+        best_teacher = None
+        max_covered = 0
+        
+        # Шукаємо викладача, який покриває найбільше непокритих предметів
+        for teacher in teachers:
+            # Скільки непокритих предметів може викладати цей викладач
+            covered = len(teacher.can_teach_subjects & uncovered_subjects)
+            
+            # Якщо цей викладач покриває більше предметів
+            if covered > max_covered:
+                best_teacher = teacher
+                max_covered = covered
+            # Якщо покриває стільки ж, але молодший
+            elif covered == max_covered and covered > 0:
+                if teacher.age < best_teacher.age:
+                    best_teacher = teacher
+        
+        # Якщо не знайшли викладача - неможливо покрити всі предмети
+        if best_teacher is None or max_covered == 0:
+            return None
+        
+        # Призначаємо предмети викладачу
+        best_teacher.assigned_subjects = best_teacher.can_teach_subjects & uncovered_subjects
+        selected_teachers.append(best_teacher)
+        
+        # Видаляємо покриті предмети
+        uncovered_subjects -= best_teacher.assigned_subjects
+    
+    return selected_teachers
+
 if __name__ == '__main__':
     # Множина предметів
     subjects = {'Математика', 'Фізика', 'Хімія', 'Інформатика', 'Біологія'}
 
     # Створення списку викладачів
     teachers = [
-        Teacher("Олександр", "Іваненко", 45, "o.ivanenko@example.com", 
+        Teacher("Олександр", "Іваненко", 45, "o.ivanenko@example.com",
                 {'Математика', 'Фізика'}),
-        Teacher("Марія", "Петренко", 38, "m.petrenko@example.com", 
+        Teacher("Марія", "Петренко", 38, "m.petrenko@example.com",
                 {'Хімія'}),
-        Teacher("Сергій", "Коваленко", 50, "s.kovalenko@example.com", 
+        Teacher("Сергій", "Коваленко", 50, "s.kovalenko@example.com",
                 {'Інформатика', 'Математика'}),
-        Teacher("Наталія", "Шевченко", 29, "n.shevchenko@example.com", 
+        Teacher("Наталія", "Шевченко", 29, "n.shevchenko@example.com",
                 {'Біологія', 'Хімія'}),
-        Teacher("Дмитро", "Бондаренко", 35, "d.bondarenko@example.com", 
+        Teacher("Дмитро", "Бондаренко", 35, "d.bondarenko@example.com",
                 {'Фізика', 'Інформатика'}),
-        Teacher("Олена", "Гриценко", 42, "o.grytsenko@example.com", 
+        Teacher("Олена", "Гриценко", 42, "o.grytsenko@example.com",
                 {'Біологія'})
     ]
 
@@ -63,6 +72,6 @@ if __name__ == '__main__':
         print("Розклад занять:")
         for teacher in schedule:
             print(f"{teacher.first_name} {teacher.last_name}, {teacher.age} років, email: {teacher.email}")
-            print(f"   Викладає предмети: {', '.join(teacher.assigned_subjects)}\\n")
+            print(f"   Викладає предмети: {', '.join(teacher.assigned_subjects)}\n")
     else:
         print("Неможливо покрити всі предмети наявними викладачами.")
